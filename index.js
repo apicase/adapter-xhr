@@ -47,7 +47,7 @@ function xhrAdapter (ctx) {
     }
   }
   xhr.onabort = function onAbort (e) {
-    ctx.another('aborted', e, true)
+    ctx.custom('aborted', e, true)
   }
   for (var key in options.headers) {
     xhr.setRequestHeader(key, options.headers[key])
