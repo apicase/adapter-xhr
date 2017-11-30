@@ -1,6 +1,6 @@
 {
   "name": "apicase-adapter-xhr",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "XHR adapter for apicase-core",
   "main": "index.js",
   "repository": "https://github.com/apicase/apicase-adapter-xhr",
