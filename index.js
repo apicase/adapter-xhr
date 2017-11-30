@@ -37,7 +37,7 @@ function xhrAdapter (ctx) {
 
   xhr.open(options.method, url, true)
   xhr.onprogress = function onProgress (e) {
-    ctx.another('progress', e, true)
+    ctx.custom('progress', e)
   }
   xhr.onload = function onLoad (e) {
     if (isSuccess(e.target, e)) {
