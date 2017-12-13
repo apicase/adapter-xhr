@@ -37,7 +37,7 @@ function xhrAdapter (ctx) {
 
   xhr.open(options.method, url, true)
   xhr.onprogress = function onProgress (e) {
-    ctx.custom('progress', e)
+    ctx.customHook('progress', e)
   }
   xhr.onload = function onLoad (e) {
     if (isSuccess(e.target, e)) {
@@ -47,7 +47,7 @@ function xhrAdapter (ctx) {
     }
   }
   xhr.onabort = function onAbort (e) {
-    ctx.custom('aborted', e, true)
+    ctx.customHook('aborted', e, true)
   }
   for (var key in options.headers) {
     xhr.setRequestHeader(key, options.headers[key])
