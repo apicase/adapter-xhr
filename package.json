@@ -1,9 +1,9 @@
 {
-  "name": "apicase-adapter-xhr",
-  "version": "0.1.3",
+  "name": "@apicase/adapter-xhr",
+  "version": "0.2.0",
   "description": "XHR adapter for apicase-core",
   "main": "index.js",
-  "repository": "https://github.com/apicase/apicase-adapter-xhr",
+  "repository": "https://github.com/apicase/adapter-xhr",
   "author": "Anton Kosykh",
   "license": "MIT",
   "scripts": {
