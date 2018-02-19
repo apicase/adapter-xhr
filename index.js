@@ -1,58 +1,67 @@
 const pathToRegexp = require('path-to-regexp')
 
-function compilePath (url, params) {
-  return pathToRegexp.compile(url)(params)
+const compilePath = (url, params) => pathToRegexp.compile(url)(params)
+
+const buildQueryString = query => {
+  const queryString = Object.entries(query).reduce(encodeURIParts, '')
+  return queryString.length ? '?' + queryString : ''
 }
 
-function evaluateHeaders (headers) {
-  return typeof headers === 'function'
-    ? headers()
-    : headers
-}
+const defaultStatusValidator = status => status >= 200 && status < 300
 
-function buildQueryString (query) {
-  var queryString = ''
-  Object.keys(query).forEach(function encodeQueryPart (key) {
-    queryString += encodeURIComponent(key) + '=' + encodeURIComponent(query[key])
-  })
-  return queryString.length
-    ? '?' + queryString
-    : ''
-}
+export default {
+  createState: () => ({
+    status: null,
+    headers: null,
+    body: null,
+    progress: null
+  }),
 
-function defaultValidator (target, event) {
-  return (target.status >= 200 && target.status <= 299) || target.status === 304
-}
+  callback({ payload, resolve, reject, emit, setResult, setCancelCallback }) {
+    const xhr = new XMLHttpRequest()
+    setCancelCallback(xhr.abort)
+    xhr.open(payload.method, payload.url, true)
 
-function xhrAdapter (ctx) {
-  var xhr = new XMLHttpRequest()
-  var url = compilePath(ctx.options.url, ctx.options.params || {})
-  var options = {
-    method: ctx.options.method || 'GET',
-    body: ctx.options.body || null,
-    headers: ctx.options.headers ? evaluateHeaders(ctx.options.headers) : {}
-  }
-  if (ctx.options.query) url += buildQueryString(ctx.options.query)
-  var isSuccess = ctx.options.validator || defaultValidator
-
-  xhr.open(options.method, url, true)
-  xhr.onprogress = function onProgress (e) {
-    ctx.customHook('progress', e)
-  }
-  xhr.onload = function onLoad (e) {
-    if (isSuccess(e.target, e)) {
-      ctx.done(e)
-    } else {
-      ctx.fail(e)
+    xhr.onprogress = e => {
+      setResult({
+        progress: (e.loaded || 0) / (e.total || 1)
+      })
     }
-  }
-  xhr.onabort = function onAbort (e) {
-    ctx.customHook('aborted', e, true)
-  }
-  for (var key in options.headers) {
-    xhr.setRequestHeader(key, options.headers[key])
-  }
-  xhr.send(options.body)
-}
 
-module.exports = xhrAdapter
+    xhr.onload = e => {
+      const res = {
+        status: e.target.status,
+        headers: payload.headers,
+        body: e.target.response,
+        progress: 1
+      }
+      if (opts.validateStatus(e.target.status)) {
+        resolve(res)
+      } else {
+        reject(res)
+      }
+    }
+  },
+
+  convert(payload) {
+    var res = {
+      url: compilePath(payload.url, payload.params || {}),
+      body: 'body' in payload ? payload.body : null,
+      method: payload.method || 'GET',
+      headers: payload.headers || {},
+      validateStatus: payload.validateStatus || defaultStatusValidator
+    }
+    if (payload.query) {
+      res.url += buildQueryString(payload.query)
+    }
+    return res
+  },
+
+  merge(from, to) {
+    const res = { ...from, ...to }
+    if (to.url && from.url) {
+      res.url = to.url[0] === '/' ? to.url : [from.url, to.url].join('/')
+    }
+    return res
+  }
+}
