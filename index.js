@@ -38,7 +38,7 @@ export default {
         body: e.target.response,
         progress: 1
       }
-      if (opts.validateStatus(e.target.status)) {
+      if (payload.validateStatus(e.target.status)) {
         resolve(res)
       } else {
         reject(res)
