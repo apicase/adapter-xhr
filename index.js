@@ -2,6 +2,9 @@ const pathToRegexp = require('path-to-regexp')
 
 const compilePath = (url, params) => pathToRegexp.compile(url)(params)
 
+const encodeURIParts = (res, [key, val]) =>
+  res + encodeURIComponent(key) + '=' + encodeURIComponent(val)
+
 const buildQueryString = query => {
   const queryString = Object.entries(query).reduce(encodeURIParts, '')
   return queryString.length ? '?' + queryString : ''
