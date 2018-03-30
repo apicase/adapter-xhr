@@ -1,13 +1,13 @@
-const pathToRegexp = require("path-to-regexp")
+const pathToRegexp = require('path-to-regexp')
 
 const compilePath = (url, params) => pathToRegexp.compile(url)(params)
 
 const encodeURIParts = (res, [key, val]) =>
-  res + encodeURIComponent(key) + "=" + encodeURIComponent(val)
+  res + encodeURIComponent(key) + '=' + encodeURIComponent(val)
 
 const buildQueryString = query => {
-  const queryString = Object.entries(query).reduce(encodeURIParts, "")
-  return queryString.length ? "?" + queryString : ""
+  const queryString = Object.entries(query).reduce(encodeURIParts, '')
+  return queryString.length ? '?' + queryString : ''
 }
 
 const defaultStatusValidator = status => status >= 200 && status < 300
@@ -49,8 +49,8 @@ export default {
   convert(payload) {
     var res = {
       url: compilePath(payload.url, payload.params || {}),
-      body: "body" in payload ? payload.body : null,
-      method: payload.method || "GET",
+      body: 'body' in payload ? payload.body : null,
+      method: payload.method || 'GET',
       headers: payload.headers || {},
       validateStatus: payload.validateStatus || defaultStatusValidator
     }
@@ -58,10 +58,10 @@ export default {
       res.url += buildQueryString(payload.query)
     }
     if (
-      typeof payload.body === "object" &&
+      typeof payload.body === 'object' &&
       !(payload.body instanceof FormData)
     ) {
-      res.headers["Content-Type"] = "application/json"
+      res.headers['Content-Type'] = 'application/json'
     }
     return res
   },
@@ -69,7 +69,7 @@ export default {
   merge(from, to) {
     const res = Object.assign({}, from, to)
     if (to.url !== undefined && from.url !== undefined) {
-      res.url = to.url[0] === "/" ? to.url : [from.url, to.url].join("/")
+      res.url = to.url[0] === '/' ? to.url : [from.url, to.url].join('/')
     }
     return res
   }
