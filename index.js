@@ -2,13 +2,28 @@ const pathToRegexp = require('path-to-regexp')
 
 const compilePath = (url, params) => pathToRegexp.compile(url)(params)
 
-const encodeURIParts = (res, [key, val]) =>
-  res + encodeURIComponent(key) + '=' + encodeURIComponent(val)
+const uriReducer = (res = [], [key, val]) =>
+  res.concat(
+    Array.isArray(val)
+      ? val.reduce((res, val, i) => uriReducer(res, [`${key}[]`, val]), [])
+      : typeof val === 'object'
+        ? Object.entries(val).reduce(
+          (res, [i, val]) => uriReducer(res, [`${key}[${i}]`, val]),
+          []
+        )
+        : `${encodeURIComponent(key)}=${encodeURIComponent(val)}`
+  )
 
-const buildQueryString = query => {
-  const queryString = Object.entries(query).reduce(encodeURIParts, '')
-  return queryString.length ? '?' + queryString : ''
-}
+const withQuestion = res => (res.length && `?${res}`) || ''
+
+const buildQueryString = payload =>
+  withQuestion(
+    typeof payload === 'string'
+      ? payload
+      : Object.entries(payload)
+        .reduce(uriReducer, [])
+        .join('&')
+  )
 
 const defaultStatusValidator = status => status >= 200 && status < 300
 
