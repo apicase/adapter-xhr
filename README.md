@@ -1,20 +1,40 @@
-# apicase-adapter-xhr
-XHR adapter for apicase-core
+# @apicase/adapter-xhr
+
+XHR adapter for [@apicase/core](https://github.com/apicase/core)
 
 ## Installation
-XHR adapter is out-of-the-box adapter and it's installed in apicase-core by default
+
+1. Install via NPM
+
+```
+npm install @apicase/adapter-xhr
+```
+
+2. Import it
+
+```javascript
+import { apicase } from '@apicase/core'
+import xhr from '@apicase/adapter-xhr'
+
+const xhrAPI = apicase(xhr)
+```
+
+We use [**node-fetch**](https://www.npmjs.com/package/node-fetch) as polyfill for Node.js
 
 ## Basic usage
 ```javascript
-apicase.call({
-  adapter: 'xhr',
+const req = await xhrAPI({
   url: '/api/posts',
   method: 'GET',
   headers: { token: 'my_secret_token' },
   query: { userId: 1 }
 })
-.then(console.log)
-.catch(console.error)
+
+if (req.success) { 
+  console.log(req.result)
+} else {
+  console.error(req.result)
+}
 ```
 
 It will call:
@@ -38,8 +58,7 @@ xhr.send(null)
 ### Url params
 Fetch adapter also has [path-to-regexp](https://github.com/pillarjs/path-to-regexp) to pass urls params smarter. Params are stored in **params** property
 ```javascript
-apicase.call({
-  adapter: 'xhr',
+xhrAPI({
   url: '/api/posts/:id',
   params: { id: 1 }
 })
@@ -49,8 +68,7 @@ apicase.call({
 ### Dynamic headers
 If you want to create dynamic headers object so you can pass **headers** property as function that returns headers object
 ```javascript
-apicase.call({
-  adapter: 'fetch',
+xhrAPI({
   url: '/api/posts',
   method: 'POST',
   headers: () => ({
@@ -64,43 +82,18 @@ It will be called every time you make a request so if token will be removed, hea
 I've added possibility to customizate resolve/reject apicase requests with **validator** callback.  
 It accepts xhr target and onload event
 ```javascript
-apicase.call({
-  adapter: 'fetch',
+xhrAPI({
   url: '/api/posts',
-  validator: (target, event) => 
-    target.status >= 200 && target.status <= 299
+  validateStatus: (status) => 
+    status >= 200 && status <= 299
 })
 ```
 Default validator function is here:
 ```javascript
-function defaultValidator (target, event) {
-  return (target.status >= 200 && target.status <= 299) || target.status === 304
+function defaultValidator (status) {
+  return status >= 200 && status < 300
 }
 ```
-
-### Progress and aborted hooks
-I know that people use XHR instead of fetch because of calls abortion and upload progress handling.  
-So there are two custom hooks for that - **progress** and **aborted**:
-```javascript
-apicase.call({
-  url: '/upload',
-  method: 'POST',
-  body: ...,
-  hooks: {
-    // xhr.onprogress
-    progress (event, next) { 
-      console.log(event)
-      next()
-    },
-    // xhr.onabort
-    aborted (event, next) { 
-      console.log(event)
-      next()
-    }
-  }
-})
-```
-> **NOTE**: **event** also has **options** property with request options because apicase calls all hooks with options injected. 
 
 ## Author
 [Anton Kosykh](https://github.com/Kelin2025)
