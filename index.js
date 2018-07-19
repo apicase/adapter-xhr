@@ -59,6 +59,8 @@ export default {
         reject(res)
       }
     }
+
+    xhr.send(payload.method.toLowerCase() === 'get' ? null : payload.body)
   },
 
   convert(payload) {
