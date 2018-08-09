@@ -53,6 +53,11 @@ export default {
         body: e.target.response,
         progress: 1
       }
+      try {
+        res.body = JSON.parse(e.target.response)
+      } catch (_) {
+        res.body = e.target.response
+      }
       if (payload.validateStatus(e.target.status)) {
         resolve(res)
       } else {
